@@ -1,4 +1,5 @@
 #include "Arduino.h"
+#include "PhotoReceptor.cpp"
 using namespace std;
 
 const int greenLEDPin = 9;
@@ -18,25 +19,7 @@ int redSensorVal = 0;
 int greenSensorVal = 0;
 int blueSensorVal = 0;
 
-// lol I almost forgot that I have to declare functions before using them... silly c
-void allOff() {
-  int numberOfLEDs = sizeof(allLEDs) / sizeof(int);
-  for (int i = 0; i < numberOfLEDs; i++) {
-    digitalWrite(allLEDs[i], 0);
-  }
-}
-
-void cycleLEDPin(int pin) {
-  digitalWrite(pin, 100);
-  delay(1000);
-  allOff();
-}
-
-void diagnosticCheck() {
-  cycleLEDPin(redLEDPin);
-  cycleLEDPin(blueLEDPin);
-  cycleLEDPin(greenLEDPin);
-}
+PhotoReceptor pr = PhotoReceptor(redLEDPin, greenLEDPin, blueLEDPin);
 
 void setup() {
   Serial.begin(9600);
@@ -44,8 +27,8 @@ void setup() {
   pinMode(redLEDPin, OUTPUT);
   pinMode(blueLEDPin, OUTPUT);
 
-  allOff();
-  diagnosticCheck();
+  pr.allOff();
+  pr.diagnosticCheck();
 }
 
 void loop() {
@@ -55,25 +38,9 @@ void loop() {
   blueSensorVal = analogRead(blueSensorPin);
   greenSensorVal = analogRead(greenSensorPin);
 
-  // Serial.print("\n\nRaw Sensor Values \nRed: ");
-  // Serial.print(redSensorVal);
-  // Serial.print("\t Green: ");
-  // Serial.print(greenSensorVal);
-  // Serial.print("\t Blue: ");
-  // Serial.print(blueSensorVal);
-
   redValue = redSensorVal/4;
   blueValue = blueSensorVal/4;
   greenValue = greenSensorVal/4;
 
-  Serial.print("\n\nMapped Sensor Values \nRed: ");
-  Serial.print(redValue);
-  Serial.print("\t Green: ");
-  Serial.print(greenValue);
-  Serial.print("\t Blue: ");
-  Serial.print(blueValue);
-
-  digitalWrite(redLEDPin, redValue);
-  digitalWrite(blueLEDPin, blueValue);
-  digitalWrite(greenLEDPin, greenValue);
+  pr.updateValues(redValue, blueValue, greenValue, true);
 }
